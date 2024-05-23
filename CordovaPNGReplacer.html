@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reemplazar PNG en Proyecto Cordova</title>
+    <style>
+        #drop-zone {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reemplazar PNG en Proyecto Cordova</h1>
+    <button id="select-folder">Seleccionar Carpeta del Proyecto</button>
+    <ul id="file-list"></ul>
+    <div id="drop-zone">Arrastra y suelta el nuevo archivo PNG aquí</div>
+    <script>
+        const selectFolderButton = document.getElementById('select-folder');
+        const dropZone = document.getElementById('drop-zone');
+        const fileList = document.getElementById('file-list');
+
+        let projectDirectoryHandle;
+
+        selectFolderButton.addEventListener('click', async () => {
+            projectDirectoryHandle = await window.showDirectoryPicker();
+            fileList.innerHTML = '';
+            await listPngFiles(projectDirectoryHandle);
+            alert('Carpeta del proyecto seleccionada y archivos PNG listados.');
+        });
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.style.borderColor = 'green';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#ccc';
+        });
+
+        dropZone.addEventListener('drop', async (event) => {
+            event.preventDefault();
+            dropZone.style.borderColor = '#ccc';
+
+            if (!projectDirectoryHandle) {
+                alert('Por favor, selecciona la carpeta del proyecto primero.');
+                return;
+            }
+
+            const files = event.dataTransfer.files;
+            if (files.length === 1 && files[0].type === 'image/png') {
+                const newPngFile = files[0];
+                await replacePngInProject(newPngFile);
+                alert('Reemplazo de PNG completado.');
+                fileList.innerHTML = '';
+                await listPngFiles(projectDirectoryHandle);
+            } else {
+                alert('Por favor, arrastra y suelta un solo archivo PNG.');
+            }
+        });
+
+        async function listPngFiles(directoryHandle, path = '') {
+            for await (const entry of directoryHandle.values()) {
+                if (entry.kind === 'file' && entry.name.endsWith('.png')) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${path}/${entry.name}`;
+                    fileList.appendChild(listItem);
+                } else if (entry.kind === 'directory') {
+                    await listPngFiles(entry, `${path}/${entry.name}`);
+                }
+            }
+        }
+
+        async function replacePngInProject(newPngFile) {
+            const newDimensions = await getPngDimensions(newPngFile);
+
+            for await (const entry of projectDirectoryHandle.values()) {
+                if (entry.kind === 'directory') {
+                    await replacePngInDirectory(entry, newPngFile, newDimensions);
+                }
+            }
+        }
+
+        async function replacePngInDirectory(directoryHandle, newPngFile, newDimensions) {
+            for await (const entry of directoryHandle.values()) {
+                if (entry.kind === 'file' && entry.name.endsWith('.png')) {
+                    const originalPngFile = await entry.getFile();
+                    const originalDimensions = await getPngDimensions(originalPngFile);
+
+                    const resizedPngFile = await resizePng(newPngFile, originalDimensions);
+
+                    const writable = await entry.createWritable();
+                    await writable.write(resizedPngFile);
+                    await writable.close();
+                    console.log(`Archivo ${entry.name} reemplazado exitosamente con nueva resolución ${originalDimensions.width}x${originalDimensions.height}.`);
+                } else if (entry.kind === 'directory') {
+                    await replacePngInDirectory(entry, newPngFile, newDimensions);
+                }
+            }
+        }
+
+        function getPngDimensions(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    resolve({ width: img.width, height: img.height });
+                    URL.revokeObjectURL(url);
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        function resizePng(file, dimensions) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = dimensions.width;
+                    canvas.height = dimensions.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, dimensions.width, dimensions.height);
+                    canvas.toBlob(blob => {
+                        resolve(new File([blob], file.name, { type: 'image/png' }));
+                    }, 'image/png');
+                    URL.revokeObjectURL(url);
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+    </script>
+</body>
+</html>
