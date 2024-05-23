@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Iconos Cordova</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  p {
+    color: #666;
+    margin-bottom: 30px;
+  }
+  #container {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    align-items: center;
+    justify-items: center;
+  }
+  #output img {
+    max-width: 100px;
+    max-height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  #exportButton {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #exportButton:hover {
+    background-color: #45a049;
+  }
+</style>
+</head>
+<body>
+  <h1>Generador de Iconos Cordova</h1>
+  <p>Selecciona una imagen PNG para generar los iconos y el logo.</p>
+  <input type="file" id="imageInput" accept="image/png" style="display: none;">
+  <label for="imageInput" id="selectImageButton">Seleccionar Imagen</label>
+  <div id="container">
+    <div id="output"></div>
+    <button id="exportButton" style="grid-column: 1 / -1; display: none;">Exportar Iconos</button>
+  </div>
+
+  <script>
+    function generateIcons() {
+      var input = document.getElementById('imageInput');
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      var output = document.getElementById('output');
+      var exportButton = document.getElementById('exportButton');
+      var iconFiles = {};
+
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            output.innerHTML = '';
+            exportButton.style.display = 'block';
+
+            // Generar el logo
+            canvas.width = 170;
+            canvas.height = 200;
+            ctx.drawImage(img, 0, 0, 170, 200);
+            var logoDataUrl = canvas.toDataURL('image/png');
+            iconFiles['logo.png'] = logoDataUrl;
+
+            // Generar los iconos
+            var sizes = [36, 48, 72, 96, 144, 192];
+            sizes.forEach(function(size) {
+              canvas.width = size;
+              canvas.height = size;
+              ctx.drawImage(img, 0, 0, size, size);
+              var dataUrl = canvas.toDataURL('image/png');
+              var imgElement = document.createElement('img');
+              imgElement.src = dataUrl;
+              output.appendChild(imgElement);
+              iconFiles['ic_launcher_' + size + '.png'] = dataUrl;
+              iconFiles['ic_launcher_foreground_' + size + '.png'] = dataUrl;
+            });
+          };
+          img.src = e.target.result;
+        };
+
+        reader.readAsDataURL(input.files[0]);
+      }
+      
+      exportButton.onclick = function() {
+        for (var filename in iconFiles) {
+          if (iconFiles.hasOwnProperty(filename)) {
+            download(iconFiles[filename], filename);
+          }
+        }
+      };
+    }
+
+    function download(dataUrl, filename) {
+      var a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    document.getElementById('selectImageButton').addEventListener('click', function() {
+      document.getElementById('imageInput').click();
+    });
+
+    document.getElementById('imageInput').addEventListener('change', generateIcons);
+  </script>
+</body>
+</html>
