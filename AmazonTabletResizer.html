@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redimensionador de Imágenes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    h2 {
+        margin-top: 20px;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .file-input {
+        margin-bottom: 10px;
+    }
+    .button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+    .button:hover {
+        background-color: #45a049;
+    }
+    #selectedFiles {
+        margin-top: 20px;
+    }
+    #previews img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+    }
+    #progressBar {
+        width: 100%;
+        height: 20px;
+        margin-top: 20px;
+        background-color: #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    #progressBarInner {
+        height: 100%;
+        background-color: #4CAF50;
+        transition: width 0.3s ease;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Selecciona archivos de screenshot:</h2>
+    <input type="file" id="screenshotInput" class="file-input" multiple accept="image/*">
+    <h2>Selecciona archivo de icono:</h2>
+    <input type="file" id="iconInput" class="file-input" accept="image/*">
+    <h2>Selecciona archivo de promo:</h2>
+    <input type="file" id="promoInput" class="file-input" accept="image/*">
+    <button class="button" onclick="processFiles()">Procesar y Descargar</button>
+
+    <div id="selectedFiles"></div>
+    <div id="previews"></div>
+
+    <div id="progressBar">
+        <div id="progressBarInner"></div>
+    </div>
+</div>
+
+<script>
+    function processFiles() {
+        var screenshotFiles = document.getElementById('screenshotInput').files;
+        var iconFile = document.getElementById('iconInput').files[0];
+        var promoFile = document.getElementById('promoInput').files[0];
+        var allFiles = [...screenshotFiles, iconFile, promoFile];
+        var zip = new JSZip();
+        var previewDiv = document.getElementById('previews');
+        var selectedFilesDiv = document.getElementById('selectedFiles');
+        var progressBarInner = document.getElementById('progressBarInner');
+        previewDiv.innerHTML = ''; // Limpiar previsualizaciones anteriores
+        selectedFilesDiv.innerHTML = ''; // Limpiar archivos seleccionados anteriores
+
+        var processedFiles = 0;
+        var totalFiles = allFiles.length;
+
+        for (var i = 0; i < allFiles.length; i++) {
+            var file = allFiles[i];
+            if (!file.type.match('image.*')) {
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    var img = new Image();
+                    img.src = e.target.result;
+
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        var ctx = canvas.getContext('2d');
+
+                        // Redimensionar a 2560x1600
+                        canvas.width = 2560;
+                        canvas.height = 1600;
+                        ctx.drawImage(img, 0, 0, 2560, 1600);
+
+                        // Agregar previsualizaciones
+                        var imgPreview = document.createElement('img');
+                        imgPreview.src = canvas.toDataURL('image/jpeg');
+                        previewDiv.appendChild(imgPreview);
+
+                        // Agregar archivos al ZIP
+                        zip.file(theFile.name.replace(/\.[^/.]+$/, "") + "_2560x1600.jpg", canvas.toDataURL('image/jpeg').split(',')[1], { base64: true });
+
+                        // Mostrar la ruta del archivo seleccionado
+                        var fileInfo = document.createElement('p');
+                        fileInfo.textContent = theFile.name + ' - ' + theFile.size + ' bytes';
+                        selectedFilesDiv.appendChild(fileInfo);
+
+                        // Si es el archivo de icono, redimensionar a 512x512 y 114x114
+                        if (theFile === iconFile) {
+                            var icon512 = document.createElement('canvas');
+                            icon512.width = icon512.height = 512;
+                            var icon512ctx = icon512.getContext('2d');
+                            icon512ctx.drawImage(img, 0, 0, 512, 512);
+
+                            var icon114 = document.createElement('canvas');
+                            icon114.width = icon114.height = 114;
+                            var icon114ctx = icon114.getContext('2d');
+                            icon114ctx.drawImage(img, 0, 0, 114, 114);
+
+                            zip.file(theFile.name.replace(/\.[^/.]+$/, "") + "_icon_512x512.png", icon512.toDataURL('image/png').split(',')[1], { base64: true });
+                            zip.file(theFile.name.replace(/\.[^/.]+$/, "") + "_icon_114x114.png", icon114.toDataURL('image/png').split(',')[1], { base64: true });
+                        }
+                        // Si es el archivo de promo, redimensionar a 1024x500
+                        else if (theFile === promoFile) {
+                            var promo = document.createElement('canvas');
+                            promo.width = 1024;
+                            promo.height = 500;
+                            var promoctx = promo.getContext('2d');
+                            promoctx.drawImage(img, 0, 0, 1024, 500);
+                            zip.file(theFile.name.replace(/\.[^/.]+$/, "") + "_promo_1024x500.jpg", promo.toDataURL('image/jpeg').split(',')[1], { base64: true });
+                        }
+
+                        processedFiles++;
+
+                        // Actualizar barra de progreso
+                        var progress = (processedFiles / totalFiles) * 100;
+                        progressBarInner.style.width = progress + '%';
+
+                        if (processedFiles === totalFiles) {
+                            // Descargar ZIP cuando se procesan todos los archivos
+                            zip.generateAsync({ type: "blob" }).then(function(content) {
+                                saveAs(content, "imagenes_redimensionadas.zip");
+                            });
+                        }
+                    }
+                };
+            })(file);
+
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
+</body>
+</html>
