@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Comando jarsigner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            word-break: break-all;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generador de Comando jarsigner</h1>
+
+    <div class="form-group">
+        <label for="directoryPicker">Selecciona la carpeta del proyecto Cordova:</label>
+        <input type="file" id="directoryPicker" webkitdirectory directory multiple>
+    </div>
+
+    <div class="form-group">
+        <label for="unitLetter">Letra de la Unidad:</label>
+        <input type="text" id="unitLetter" placeholder="Ej: C:\\Apps" value="C:\\Apps">
+    </div>
+
+    <div class="form-group">
+        <label for="aabFiles">Archivos .aab encontrados:</label>
+        <select id="aabFiles">
+            <option value="">Selecciona un archivo .aab</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="keystore">Keystore:</label>
+        <input type="text" id="keystore" placeholder="Ej: burlasoft.keystore" value="burlasoft.keystore">
+    </div>
+
+    <div class="form-group">
+        <label for="keystorePassword">Contraseña del Keystore:</label>
+        <input type="password" id="keystorePassword" placeholder="Introduce la contraseña del keystore">
+    </div>
+
+    <div class="form-group">
+        <label for="alias">Alias:</label>
+        <input type="text" id="alias" placeholder="Ej: burlasoft" value="burlasoft">
+    </div>
+
+    <div class="form-group">
+        <label for="sigalg">Algoritmo de Firma:</label>
+        <input type="text" id="sigalg" placeholder="Ej: SHA1withRSA" value="SHA1withRSA">
+    </div>
+
+    <div class="form-group">
+        <label for="digestalg">Algoritmo de Digest:</label>
+        <input type="text" id="digestalg" placeholder="Ej: SHA1" value="SHA1">
+    </div>
+
+    <button onclick="generateCommand()">Generar y Copiar Comando</button>
+    <button onclick="saveSettings()">Guardar Configuración</button>
+
+    <div class="output" id="output"></div>
+
+    <script>
+        document.getElementById('directoryPicker').addEventListener('change', function(event) {
+            const directory = event.target.files;
+            const aabFilesSelect = document.getElementById('aabFiles');
+            aabFilesSelect.innerHTML = '<option value="">Selecciona un archivo .aab</option>';
+            
+            for (let i = 0; i < directory.length; i++) {
+                const file = directory[i];
+                if (file.name.endsWith('.aab')) {
+                    const option = document.createElement('option');
+                    option.value = file.webkitRelativePath;
+                    option.textContent = file.webkitRelativePath;
+                    aabFilesSelect.appendChild(option);
+                }
+            }
+        });
+
+        function generateCommand() {
+            const keystore = document.getElementById('keystore').value.trim();
+            const keystorePassword = document.getElementById('keystorePassword').value.trim();
+            const aabFile = document.getElementById('aabFiles').value;
+            const alias = document.getElementById('alias').value.trim();
+            const sigalg = document.getElementById('sigalg').value.trim();
+            const digestalg = document.getElementById('digestalg').value.trim();
+            const unitLetter = document.getElementById('unitLetter').value.trim();
+
+            if (!keystore || !aabFile || !alias || !sigalg || !digestalg || !unitLetter) {
+                alert("Por favor, completa todos los campos requeridos.");
+                return;
+            }
+
+            // Convertir las barras a barras invertidas
+            const fullPath = `${unitLetter}\\${aabFile.replace(/\//g, '\\')}`;
+
+            let command = `jarsigner -verbose -sigalg ${sigalg} -digestalg ${digestalg} -keystore ${keystore}`;
+            if (keystorePassword) {
+                command += ` -storepass ${keystorePassword}`;
+            }
+            command += ` ${fullPath} ${alias}`;
+            
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = command;
+
+            navigator.clipboard.writeText(command).then(() => {
+                alert('Comando copiado al portapapeles!');
+            }).catch(err => {
+                alert('Error al copiar el comando: ' + err);
+            });
+        }
+
+        function saveSettings() {
+            const keystore = document.getElementById('keystore').value.trim();
+            const keystorePassword = document.getElementById('keystorePassword').value.trim();
+            const alias = document.getElementById('alias').value.trim();
+            const sigalg = document.getElementById('sigalg').value.trim();
+            const digestalg = document.getElementById('digestalg').value.trim();
+            const unitLetter = document.getElementById('unitLetter').value.trim();
+
+            const settings = {
+                keystore,
+                keystorePassword,
+                alias,
+                sigalg,
+                digestalg,
+                unitLetter
+            };
+
+            localStorage.setItem('jarsignerSettings', JSON.stringify(settings));
+            alert('Configuración guardada!');
+        }
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('jarsignerSettings'));
+            if (settings) {
+                document.getElementById('keystore').value = settings.keystore;
+                document.getElementById('keystorePassword').value = settings.keystorePassword;
+                document.getElementById('alias').value = settings.alias;
+                document.getElementById('sigalg').value = settings.sigalg;
+                document.getElementById('digestalg').value = settings.digestalg;
+                document.getElementById('unitLetter').value = settings.unitLetter;
+            }
+        }
+
+        // Cargar la configuración al iniciar
+        window.onload = loadSettings;
+    </script>
+</body>
+</html>
