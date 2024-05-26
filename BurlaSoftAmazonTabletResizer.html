@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Redimensionador de Imágenes</title>
+<title>Appstore Image Resizer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <style>
@@ -60,13 +60,13 @@
 </head>
 <body>
 <div class="container">
-    <h2>Selecciona archivos de screenshot:</h2>
+    <h2>Select screenshot files:</h2>
     <input type="file" id="screenshotInput" class="file-input" multiple accept="image/*">
-    <h2>Selecciona archivo de icono:</h2>
+    <h2>Select icon file:</h2>
     <input type="file" id="iconInput" class="file-input" accept="image/*">
-    <h2>Selecciona archivo de promo:</h2>
+    <h2>Select promo file:</h2>
     <input type="file" id="promoInput" class="file-input" accept="image/*">
-    <button class="button" onclick="processFiles()">Procesar y Descargar</button>
+    <button class="button" onclick="processFiles()">Process and Download</button>
 
     <div id="selectedFiles"></div>
     <div id="previews"></div>
@@ -161,7 +161,7 @@
                         if (processedFiles === totalFiles) {
                             // Descargar ZIP cuando se procesan todos los archivos
                             zip.generateAsync({ type: "blob" }).then(function(content) {
-                                saveAs(content, "imagenes_redimensionadas.zip");
+                                saveAs(content, "Resizedimages.zip");
                             });
                         }
                     }
