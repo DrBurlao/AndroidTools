@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reemplazar PNG en Proyecto Cordova</title>
+    <title>Cordova PNG replacer</title>
     <style>
         #drop-zone {
             width: 100%;
@@ -28,9 +28,9 @@
 </head>
 <body>
     <h1>Reemplazar PNG en Proyecto Cordova</h1>
-    <button id="select-folder">Seleccionar Carpeta del Proyecto</button>
+    <button id="select-folder">Select Project Folder</button>
     <ul id="file-list"></ul>
-    <div id="drop-zone">Arrastra y suelta el nuevo archivo PNG aquí</div>
+    <div id="drop-zone">Drag and drop the new PNG file here</div>
     <script>
         const selectFolderButton = document.getElementById('select-folder');
         const dropZone = document.getElementById('drop-zone');
@@ -42,7 +42,7 @@
             projectDirectoryHandle = await window.showDirectoryPicker();
             fileList.innerHTML = '';
             await listPngFiles(projectDirectoryHandle);
-            alert('Carpeta del proyecto seleccionada y archivos PNG listados.');
+            alert('The project folder has been selected, and PNG files are listed.');
         });
 
         dropZone.addEventListener('dragover', (event) => {
@@ -59,7 +59,7 @@
             dropZone.style.borderColor = '#ccc';
 
             if (!projectDirectoryHandle) {
-                alert('Por favor, selecciona la carpeta del proyecto primero.');
+                alert('Please select the project folder');
                 return;
             }
 
@@ -67,11 +67,11 @@
             if (files.length === 1 && files[0].type === 'image/png') {
                 const newPngFile = files[0];
                 await replacePngInProject(newPngFile);
-                alert('Reemplazo de PNG completado.');
+                alert('PNG replacement completed.');
                 fileList.innerHTML = '';
                 await listPngFiles(projectDirectoryHandle);
             } else {
-                alert('Por favor, arrastra y suelta un solo archivo PNG.');
+                alert('Please drag and drop a single PNG file.');
             }
         });
 
@@ -108,7 +108,7 @@
                     const writable = await entry.createWritable();
                     await writable.write(resizedPngFile);
                     await writable.close();
-                    console.log(`Archivo ${entry.name} reemplazado exitosamente con nueva resolución ${originalDimensions.width}x${originalDimensions.height}.`);
+                    console.log(`Archivo ${entry.name} Successfully replaced with new resolution. ${originalDimensions.width}x${originalDimensions.height}.`);
                 } else if (entry.kind === 'directory') {
                     await replacePngInDirectory(entry, newPngFile, newDimensions);
                 }
