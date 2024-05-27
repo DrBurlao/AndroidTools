@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l;'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MBMCQ95B');</script>
+    <!-- End Google Tag Manager -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y6MVWV0R1H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Y6MVWV0R1H');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noob Commander</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        input[type="text"], select, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 250px;
+            font-family: monospace;
+        }
+        .command-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .command-button:hover {
+            background-color: #45a049;
+        }
+        .command-button:active {
+            background-color: #39843c;
+        }
+        .command-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #commands-container, #buttons-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .dropdown-container {
+            position: relative;
+        }
+        .dropdown-container input[type="text"] {
+            padding-right: 30px;
+        }
+        .dropdown-container .dropdown-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            z-index: 1000;
+        }
+        .dropdown-container .dropdown-list div {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .dropdown-container .dropdown-list div:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+        <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MBMCQ95B"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <div id="commands-container">
+        <h1>Noob Commander</h1>
+        <input type="text" id="projectName" placeholder="Enter Project Name">
+        <input type="text" id="exampleName" placeholder="Enter Example Name (e.g., example)">
+        
+        <div class="dropdown-container">
+            <input type="text" id="pluginSearch" placeholder="Search Plugin">
+            <div class="dropdown-list" id="pluginList">
+                <!-- Plugin options will be dynamically generated here -->
+            </div>
+        </div>
+        
+        <div class="dropdown-container">
+            <input type="text" id="platformSearch" placeholder="Search Platform">
+            <div class="dropdown-list" id="platformList">
+                <div data-value="android">android</div>
+                <div data-value="ios">ios</div>
+                <!-- Add more platforms as needed -->
+            </div>
+        </div>
+        
+        <textarea id="commands" readonly></textarea>
+    </div>
+
+    <div id="buttons-container">
+        <button class="command-button" onclick="addCommand('cordovaCreate')">Create Cordova Project</button>
+        <button class="command-button" onclick="addCommand('navigateProject')">Navigate to Project Directory</button>
+        <button class="command-button" onclick="addCommand('addPlatform')">Add Platform</button>
+        <button class="command-button" onclick="addCommand('removePlatform')">Remove Platform</button>
+        <button class="command-button" onclick="addCommand('cleanProject')">Clean Project</button>
+        <button class="command-button" onclick="addCommand('buildAPK')">Build APK (Android)</button>
+        <button class="command-button" onclick="addCommand('buildBundle')">Build Bundle (Android)</button>
+        <button class="command-button" onclick="addCommand('runAndroid')">Run App on Android Device</button>
+        <button class="command-button" onclick="addCommand('listPlatforms')">List Added Platforms</button>
+        <button class="command-button" onclick="addCommand('listPlugins')">List Added Plugins</button>
+        <button class="command-button" onclick="addCommand('addPlugin')">Add Plugin</button>
+        <button class="command-button" onclick="clearCommands()">Clear Commands</button>
+        <button class="command-button" onclick="copyToClipboard()">Copy Commands</button>
+    </div>
+
+    <script>
+        var commands = [];
+        const plugins = [
+            "cordova-plugin-battery-status",
+            "cordova-plugin-camera",
+            "cordova-plugin-device",
+            "cordova-plugin-dialogs",
+            "cordova-plugin-file",
+            "cordova-plugin-geolocation",
+            "cordova-plugin-globalization",
+            "cordova-plugin-inappbrowser",
+            "cordova-plugin-media",
+            "cordova-plugin-media-capture",
+            "cordova-plugin-network-information",
+            "cordova-plugin-splashscreen",
+            "cordova-plugin-statusbar",
+            "cordova-plugin-vibration",
+            "cordova-plugin-whitelist",
+            "cordova-plugin-contacts",
+            "cordova-plugin-push",
+            "cordova-plugin-qrscanner",
+            "cordova-plugin-ble-central",
+            "cordova-plugin-app-version"
+            // Add more plugins as needed
+        ];
+
+        const commandInfo = {
+            cordovaCreate: {
+                name: 'Create Cordova Project',
+                template: (projectName, exampleName) => `cordova create ${projectName.replace(/ /g, "_")} com.${exampleName.toLowerCase()}.${projectName.replace(/ /g, "").toLowerCase()} ${projectName}`
+            },
+            navigateProject: {
+                name: 'Navigate to Project Directory',
+                template: projectName => `cd ${projectName.replace(/ /g, "_")}`
+            },
+            addPlatform: {
+                name: 'Add Platform',
+                template: platformName => `cordova platform add ${platformName}`
+            },
+            removePlatform: {
+                name: 'Remove Platform',
+                template: platformName => `cordova platform rm ${platformName}`
+            },
+            cleanProject: {
+                name: 'Clean Project',
+                template: 'cordova clean'
+            },
+            buildAPK: {
+                name: 'Build APK (Android)',
+                template: 'cordova build android'
+            },
+            buildBundle: {
+                name: 'Build Bundle (Android)',
+                template: 'cordova build android --release -- --packageType=bundle'
+            },
+            runAndroid: {
+                name: 'Run App on Android Device',
+                template: 'cordova run android'
+            },
+            listPlatforms: {
+                name: 'List Added Platforms',
+                template: 'cordova platform ls'
+            },
+            listPlugins: {
+                name: 'List Added Plugins',
+                template: 'cordova plugin ls'
+            },
+            addPlugin: {
+                name: 'Add Plugin',
+                template: pluginName => `cordova plugin add ${pluginName}`
+            }
+        };
+
+        function addCommand(command) {
+            var projectName = document.getElementById("projectName").value.trim();
+            var exampleName = document.getElementById("exampleName").value.trim() || "example";
+            var pluginName = document.querySelector('#pluginList .selected')?.dataset.value;
+            var platformName = document.querySelector('#platformList .selected')?.dataset.value;
+
+            var commandObj = commandInfo[command];
+            if (commandObj) {
+                var newCommand;
+                if (command === 'addPlugin') {
+                    if (!pluginName) {
+                        alert("Please select a plugin.");
+                        return;
+                    }
+                    newCommand = commandObj.template(pluginName);
+                } else if (command === 'addPlatform' || command === 'removePlatform') {
+                    if (!platformName) {
+                        alert("Please select a platform.");
+                        return;
+                    }
+                    newCommand = commandObj.template(platformName);
+                } else {
+                    newCommand = typeof commandObj.template === 'function' ?
+                        commandObj.template(projectName, exampleName) :
+                        commandObj.template;
+                }
+
+                commands.push(newCommand);
+                updateCommandsTextarea();
+            }
+        }
+
+        function updateCommandsTextarea() {
+            var textarea = document.getElementById("commands");
+            textarea.value = commands.join('\n');
+        }
+
+        function clearCommands() {
+            commands = [];
+            updateCommandsTextarea();
+        }
+
+        function copyToClipboard() {
+            var textarea = document.getElementById("commands");
+            textarea.select();
+            document.execCommand("copy");
+            alert("Commands copied to clipboard");
+        }
+
+        function setupDropdown(inputId, listId, items) {
+            var input = document.getElementById(inputId);
+            var list = document.getElementById(listId);
+
+            input.addEventListener('input', function() {
+                var filter = input.value.toLowerCase();
+                list.innerHTML = '';
+                items.filter(item => item.toLowerCase().includes(filter))
+                    .forEach(item => {
+                        var div = document.createElement('div');
+                        div.textContent = item;
+                        div.dataset.value = item;
+                        div.addEventListener('click', function() {
+                            document.querySelectorAll(`#${listId} .selected`).forEach(el => el.classList.remove('selected'));
+                            div.classList.add('selected');
+                            input.value = item;
+                            list.style.display = 'none';
+                        });
+                        list.appendChild(div);
+                    });
+                list.style.display = 'block';
+            });
+
+            input.addEventListener('focus', function() {
+                input.dispatchEvent(new Event('input'));
+            });
+
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    list.style.display = 'none';
+                }, 100);
+            });
+        }
+
+        setupDropdown('pluginSearch', 'pluginList', plugins);
+        setupDropdown('platformSearch', 'platformList', ['android', 'ios']);
+    </script>
+</body>
+</html>

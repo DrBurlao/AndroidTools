@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l;'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MBMCQ95B');</script>
+    <!-- End Google Tag Manager -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y6MVWV0R1H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Y6MVWV0R1H');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BurlaSoft - Jar Signer Command</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            word-break: break-all;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+        <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MBMCQ95B"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <h1>BurlaSoft - Jar Signer Command</h1>
+
+    <div class="form-group">
+        <label for="directoryPicker">Select the Cordova project folder:</label>
+        <input type="file" id="directoryPicker" webkitdirectory directory multiple>
+    </div>
+
+    <div class="form-group">
+        <label for="unitLetter">Unit:</label>
+        <input type="text" id="unitLetter" placeholder="Ej: C:\\Apps" value="C:\\Apps">
+    </div>
+
+    <div class="form-group">
+        <label for="aabFiles">.aab files found:</label>
+        <select id="aabFiles">
+            <option value="">Select an .aab file</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="keystore">Keystore:</label>
+        <input type="text" id="keystore" placeholder="Ej: example.keystore" value="example.keystore">
+    </div>
+
+    <div class="form-group">
+        <label for="keystorePassword">Keystore Password:</label>
+        <input type="password" id="keystorePassword" placeholder="Enter the keystore password">
+    </div>
+
+    <div class="form-group">
+        <label for="alias">Alias:</label>
+        <input type="text" id="alias" placeholder="Ej: example" value="example">
+    </div>
+
+    <div class="form-group">
+        <label for="sigalg">Signature Algorithm:</label>
+        <input type="text" id="sigalg" placeholder="Ej: SHA1withRSA" value="SHA1withRSA">
+    </div>
+
+    <div class="form-group">
+        <label for="digestalg">Digest algorithm:</label>
+        <input type="text" id="digestalg" placeholder="Ej: SHA1" value="SHA1">
+    </div>
+
+    <button onclick="generateCommand()">Generate and Copy Command</button>
+    <button onclick="saveSettings()">Save settings</button>
+
+    <div class="output" id="output"></div>
+
+    <script>
+        document.getElementById('directoryPicker').addEventListener('change', function(event) {
+            const directory = event.target.files;
+            const aabFilesSelect = document.getElementById('aabFiles');
+            aabFilesSelect.innerHTML = '<option value="">Select an .aab file</option>';
+            
+            for (let i = 0; i < directory.length; i++) {
+                const file = directory[i];
+                if (file.name.endsWith('.aab')) {
+                    const option = document.createElement('option');
+                    option.value = file.webkitRelativePath;
+                    option.textContent = file.webkitRelativePath;
+                    aabFilesSelect.appendChild(option);
+                }
+            }
+        });
+
+        function generateCommand() {
+            const keystore = document.getElementById('keystore').value.trim();
+            const keystorePassword = document.getElementById('keystorePassword').value.trim();
+            const aabFile = document.getElementById('aabFiles').value;
+            const alias = document.getElementById('alias').value.trim();
+            const sigalg = document.getElementById('sigalg').value.trim();
+            const digestalg = document.getElementById('digestalg').value.trim();
+            const unitLetter = document.getElementById('unitLetter').value.trim();
+
+            if (!keystore || !aabFile || !alias || !sigalg || !digestalg || !unitLetter) {
+                alert("Please complete all required fields.");
+                return;
+            }
+
+            // Convertir las barras a barras invertidas
+            const fullPath = `${unitLetter}\\${aabFile.replace(/\//g, '\\')}`;
+
+            let command = `jarsigner -verbose -sigalg ${sigalg} -digestalg ${digestalg} -keystore ${keystore}`;
+            if (keystorePassword) {
+                command += ` -storepass ${keystorePassword}`;
+            }
+            command += ` ${fullPath} ${alias}`;
+            
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = command;
+
+            navigator.clipboard.writeText(command).then(() => {
+                alert('Command copied to clipboard!');
+            }).catch(err => {
+                alert('Error copying command: ' + err);
+            });
+        }
+
+        function saveSettings() {
+            const keystore = document.getElementById('keystore').value.trim();
+            const keystorePassword = document.getElementById('keystorePassword').value.trim();
+            const alias = document.getElementById('alias').value.trim();
+            const sigalg = document.getElementById('sigalg').value.trim();
+            const digestalg = document.getElementById('digestalg').value.trim();
+            const unitLetter = document.getElementById('unitLetter').value.trim();
+
+            const settings = {
+                keystore,
+                keystorePassword,
+                alias,
+                sigalg,
+                digestalg,
+                unitLetter
+            };
+
+            localStorage.setItem('jarsignerSettings', JSON.stringify(settings));
+            alert('Saved configuration!');
+        }
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('jarsignerSettings'));
+            if (settings) {
+                document.getElementById('keystore').value = settings.keystore;
+                document.getElementById('keystorePassword').value = settings.keystorePassword;
+                document.getElementById('alias').value = settings.alias;
+                document.getElementById('sigalg').value = settings.sigalg;
+                document.getElementById('digestalg').value = settings.digestalg;
+                document.getElementById('unitLetter').value = settings.unitLetter;
+            }
+        }
+
+        // Cargar la configuración al iniciar
+        window.onload = loadSettings;
+    </script>
+</body>
+</html>

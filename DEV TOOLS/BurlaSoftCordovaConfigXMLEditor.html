@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l;'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MBMCQ95B');</script>
+    <!-- End Google Tag Manager -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y6MVWV0R1H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Y6MVWV0R1H');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cordova Config Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            max-width: 100%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px 0;
+            background-color: #28a745; /* Cambiar a verde */
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838; /* Cambiar a verde más oscuro al pasar el cursor */
+        }
+    </style>
+</head>
+<body>
+        <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MBMCQ95B"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <h1>Cordova Config Editor</h1>
+    <form id="widget_form">
+        <label for="widget_id">Widget ID:</label>
+        <input type="text" id="widget_id" name="widget_id" value="com.example.widget">
+        
+        <label for="widget_version">Version:</label>
+        <input type="text" id="widget_version" name="widget_version" value="1.0.0">
+        
+        <label for="widget_name">Widget Name:</label>
+        <input type="text" id="widget_name" name="widget_name" value="MyWidget">
+        
+        <label for="widget_description">Description:</label>
+        <input type="text" id="widget_description" name="widget_description" value="A simple widget">
+        
+        <label for="widget_author">Author:</label>
+        <input type="text" id="widget_author" name="widget_author" value="author@example.com">
+        
+        <label for="widget_author_href">Author Href:</label>
+        <input type="text" id="widget_author_href" name="widget_author_href" value="https://example.com">
+        
+        <label for="widget_content_src">Content Src:</label>
+        <input type="text" id="widget_content_src" name="widget_content_src" value="index.html">
+        
+        <label for="widget_allow_intent1">Allow Intent 1:</label>
+        <input type="text" id="widget_allow_intent1" name="widget_allow_intent1" value="http://*/*">
+        
+        <label for="widget_allow_intent2">Allow Intent 2:</label>
+        <input type="text" id="widget_allow_intent2" name="widget_allow_intent2" value="https://*/*">
+        
+        <label for="widget_keystore">Key Store:</label>
+        <input type="text" id="widget_keystore" name="widget_keystore" value="example.keystore">
+        
+        <label for="widget_keystore_password">Key Store Password:</label>
+        <input type="password" id="widget_keystore_password" name="widget_keystore_password" value="keystorepassword">
+        
+        <label for="widget_keystore_alias">Key Store Alias:</label>
+        <input type="text" id="widget_keystore_alias" name="widget_keystore_alias" value="keyalias">
+        
+        <label for="widget_key_password">Key Password:</label>
+        <input type="password" id="widget_key_password" name="widget_key_password" value="keypassword">
+        
+        <button type="button" onclick="generateWidgetXML()">Generate XML</button>
+    </form>
+
+    <script>
+        function generateWidgetXML() {
+            var widgetId = document.getElementById("widget_id").value;
+            var widgetVersion = document.getElementById("widget_version").value;
+            var widgetName = document.getElementById("widget_name").value;
+            var widgetDescription = document.getElementById("widget_description").value;
+            var widgetAuthor = document.getElementById("widget_author").value;
+            var widgetAuthorHref = document.getElementById("widget_author_href").value;
+            var widgetContentSrc = document.getElementById("widget_content_src").value;
+            var widgetAllowIntent1 = document.getElementById("widget_allow_intent1").value;
+            var widgetAllowIntent2 = document.getElementById("widget_allow_intent2").value;
+            var widgetKeystore = document.getElementById("widget_keystore").value;
+            var widgetKeystorePassword = document.getElementById("widget_keystore_password").value;
+            var widgetKeystoreAlias = document.getElementById("widget_keystore_alias").value;
+            var widgetKeyPassword = document.getElementById("widget_key_password").value;
+
+            var xmlString = `<?xml version='1.0' encoding='utf-8'?>
+                <widget id="${widgetId}" version="${widgetVersion}" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+                    <name>${widgetName}</name>
+                    <description>${widgetDescription}</description>
+                    <author email="${widgetAuthor}" href="${widgetAuthorHref}">${widgetAuthor}</author>
+                    <content src="${widgetContentSrc}" />
+                    <allow-intent href="${widgetAllowIntent1}" />
+                    <allow-intent href="${widgetAllowIntent2}" />
+                    
+                    <!-- Configuración de firma para Android -->
+                    <platform name="android">
+                        <preference name="android-signing-key-store" value="${widgetKeystore}" />
+                        <preference name="android-signing-key-store-password" value="${widgetKeystorePassword}" />
+                        <preference name="android-signing-key-alias" value="${widgetKeystoreAlias}" />
+                        <preference name="android-signing-key-password" value="${widgetKeyPassword}" />
+                    </platform>
+                </widget>`;
+
+            var blob = new Blob([xmlString], { type: 'application/xml' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'config.xml';
+            link.click();
+        }
+    </script>
+</body>
+</html>
